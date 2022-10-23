@@ -17,9 +17,9 @@ app.use((req,res,next)=>{
 
 
 const connection = mysql.createPool({
-    "host": "localhost",
+    "host": "127.0.0.1",
     "user":"root",
-    "password":"root",
+    "password":"",
     "database": "crm"
 });
 connection.getConnection((err,connection) =>{
@@ -106,11 +106,41 @@ app.post('/create/',async (req,res)=>{
     }
 })
 
+
+app.put('/modify/',async (req,res)=>{
+    let {fname,lname,mobile,email,stats,comments,id} = req.body
+    comments= comments?comments:'';
+    lname = lname? lname:''
+    let insertQuery = `update customers set first_name ='${fname}',last_name = '${lname}' ,email = '${email}',contact = '${mobile}',status='${stats}',comments='${comments}' where id = ${id}` 
+
+    let resultUser = await executeQuery(insertQuery);
+    console.log(resultUser)
+    if(resultUser.status == 'OK'){
+        res.status(200).send({status:'updated',id:resultUser.result})
+    }else{
+        res.status(400).send({status:'Error',id:resultUser.result})
+    }
+})
+
 app.get('/allCustomer/',async (req,res)=>{
     
     let getQuery = `select id, first_name,last_name,email,contact,status,comments from customers`;
 
     let resultUser = await executeQuery(getQuery);
+    console.log(resultUser)
+    if(resultUser.status == 'OK'){
+        res.status(200).send({status:'true', result:resultUser.result})
+    }else{
+        res.status(400).send({status:'Error',result:resultUser.result})
+    }
+})
+
+
+app.delete('/delete/:id',async (req,res)=>{
+    const id = req.params.id;
+    let deleteQuery = `delete from customers where id = ${id}`;
+
+    let resultUser = await executeQuery(deleteQuery);
     console.log(resultUser)
     if(resultUser.status == 'OK'){
         res.status(200).send({status:'true', result:resultUser.result})
